@@ -37,7 +37,7 @@ const buscarInformacoes = async (q, values) => {
   }
 };
 
-app.get('/', async (req, res) => {
+app.get('/sorteio', async (req, res) => {
   const h = req.query.h;
   let informacoes;
   let nomeUsuario;

@@ -6,32 +6,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sorteio de Números</title>
     <style>
+
         body {
+            display: flex;
+            align-content: center;
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 0;
             padding: 0;
             background-color: #f4f4f4;
         }
-
+        
         .container {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
             background-color: #fff;
             border-radius: 8px;
             margin: 20px auto;
-            padding: 20px;
+            padding: 15px;
             width: 80%;
             max-width: 400px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+       
+        p{
+            font-size: 1.2rem;
         }
 
         #nome,
         #numeroEscolhido,
         #numeroSorteado {
-            margin: 20px 0;
-        }
-
-        #nome {
-            color: #333;
+            justify-content: center;
         }
 
         #numeroEscolhido {
@@ -43,10 +49,6 @@
             color: red;
         }
 
-        .resultado {
-            color: #777;
-            padding: 5px;
-        }
 
         button {
             background-color: green;
@@ -61,6 +63,28 @@
         button:hover {
             opacity: 0.9;
         }
+
+        #nomeUsuario {
+            font-size: 2rem;
+            color: #777;
+        }
+
+        #divResultado {
+            display: none;
+        }
+
+        #resultado {
+            justify-content: center;
+            display: none;
+        }
+
+        .ganhou {
+            color: green;
+        }
+
+        .perdeu {
+            color: red;
+        }
     </style>
 </head>
 
@@ -68,31 +92,40 @@
 
     <div class="container">
         <div id="nome">
-            <h2>Seu Nome</h2>
-            <p>
+            <p id="nomeUsuario">
                 <%= nomeUsuario %>
             </p>
         </div>
 
         <div id="numeroEscolhido" class="container">
             <h2>Número Escolhido</h2>
-            <p>
+            <p id="numeroEscolhido">
                 <%= numeroEscolhido %>
             </p>
         </div>
 
         <div id="numeroSorteado" class="container">
             <h2>Número Sorteado</h2>
-            <p><%= numeroSorteado %></p>
+            <p id="numeroSorteado">
+                <%= numeroSorteado %>
+            </p>
         </div>
 
+        <div id="divResultado" class="container">
+            <p id="resultado"></p>
+        </div>
 
         <button id="botaoSortear" onclick="sortearNumero()">SORTEAR AGORA</button>
     </div>
     <script>
         function sortearNumero() {
-            let divNumSorteado = document.querySelector("#numeroSorteado")
+            let divNumSorteado = document.querySelector("#numeroSorteado");
+            let numeroEscolhido = document.querySelector("#numeroEscolhido");
+            let divResultado = document.querySelector("#divResultado");
+            let resultado = document.querySelector("#resultado");
+
             divNumSorteado.style.display = "flex";
+            divNumSorteado.children[1].style.display = "flex";
             let numSorteado = divNumSorteado.children[1].innerHTML
 
             const currentUrl = new URL(window.location.href);
@@ -101,7 +134,7 @@
             console.log(hash_key)
             console.log(numSorteado.innerHTML)
 
-            fetch('http://localhost:3000/sorteio', {
+            fetch('http://localhost:8080/sorteio', {
                 method: "POST",
                 headers: {
                     "Content-type": "application/json"
@@ -111,6 +144,20 @@
                     num_sorteado: numSorteado
                 })
             })
+
+            if (numSorteado === numeroEscolhido) {
+                resultado.innerHTML = "Parabens, você ganhou o sorteio!!!"
+                divResultado.classList.add("gahnou");
+            } else {
+                resultado.innerHTML = "Infelizmente você não ganhou o sorteio."
+                divResultado.classList.add("perdeu");
+            }
+
+            divResultado.style.display = "flex";
+            resultado.style.display = "flex";
+
+
+            document.querySelector("#botaoSortear").style.display = "none";
         }
 
     </script>
