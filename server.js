@@ -1,5 +1,5 @@
 const express = require('express');
-const https = require( 'https');
+const https = require('https');
 const fs = require('fs');
 const path = require("path")
 const cors = require('cors')
@@ -52,7 +52,7 @@ app.get('/sorteio', async (req, res) => {
     informacoes = await buscarInformacoes('SELECT * FROM lead WHERE key_hash = $1', param);
     console.log(informacoes);
 
-    if(!informacoes[0]){
+    if (!informacoes[0]) {
       console.log("Infelizmente você não esta cadastrado!!")
       res.render('sem_cadastro');
       res.status(403);
@@ -63,18 +63,10 @@ app.get('/sorteio', async (req, res) => {
     numeroSorteado = informacoes[0].num_sorteado;
 
     if (!informacoes[0].num_sorteado) {
-      function generateRandomNumber() {
-        const min = 100000;
-        const max = 999999;
-        const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-        return randomNumber;
-      }
 
-      numeroSorteado = parseInt(generateRandomNumber());
       res.render('sorteio', {
         nomeUsuario: nomeUsuario,
         numeroEscolhido: numeroEscolhido,
-        numeroSorteado: numeroSorteado,
       })
       return;
     }
@@ -96,10 +88,11 @@ app.post(`/sorteio`, (req, res) => {
   console.log(req.body + "requisicao post")
   let hash_key = req.body.hash_key;
   let num_sorteado = req.body.num_sorteado;
-  let query =  buscarInformacoes(`UPDATE lead SET num_sorteado = $1 WHERE key_hash = $2`, [num_sorteado, hash_key]);
+  let query = buscarInformacoes(`UPDATE lead SET num_sorteado = $1 WHERE key_hash = $2`, [num_sorteado, hash_key]);
   console.log(query);
   res.status(200);
 })
+
 
 app.listen(80, () => {
   console.log(`Aplicação ouvindo na porta 80`);
