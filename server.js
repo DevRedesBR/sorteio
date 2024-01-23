@@ -1,7 +1,9 @@
 const express = require('express');
 const https = require( 'https');
 const fs = require('fs');
+const path = require("path")
 const cors = require('cors')
+const acmeChallengePath = path.join(__dirname + '/public/www/sorteio.onlinecenter.com.br', '.well-known', 'acme-challenge');
 
 require('dotenv').config();
 const bodyParser = require('body-parser')
@@ -10,20 +12,19 @@ const port = process.env.PORT_SERVER;
 const { Pool } = require('pg');
 
 const app = express();
-app.use(express.static('Public'));
+app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json())
 app.set('view engine', 'ejs');
-app.use(cors())
+app.use(cors());
 
 
 const pool = new Pool({
-  user: process.env.USER,
-  host: process.env.HOST,
+  user: process.env.USER_DB,
+  host: process.env.HOST_DB,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
   port: process.env.PORT_DB,
 });
-// console.log(process.env.USER,process.env.HOST,process.env.DATABASE,process.env.PASSWORD,process.env.PORT_DB)
 
 const buscarInformacoes = async (q, values) => {
   const query = q;
@@ -37,6 +38,8 @@ const buscarInformacoes = async (q, values) => {
   }
 };
 
+app.use('/.well-known/acme-challenge', express.static(acmeChallengePath))
+
 app.get('/sorteio', async (req, res) => {
   const h = req.query.h;
   let informacoes;
@@ -46,7 +49,7 @@ app.get('/sorteio', async (req, res) => {
 
   if (h) {
     const param = [h]
-    informacoes = await buscarInformacoes('SELECT * FROM tbteste WHERE hash_key = $1', param);
+    informacoes = await buscarInformacoes('SELECT * FROM lead WHERE key_hash = $1', param);
     console.log(informacoes);
 
     if(!informacoes[0]){
@@ -90,21 +93,31 @@ app.get('/sorteio', async (req, res) => {
 });
 
 app.post(`/sorteio`, (req, res) => {
-  console.log(req.body)
+  console.log(req.body + "requisicao post")
   let hash_key = req.body.hash_key;
   let num_sorteado = req.body.num_sorteado;
-  buscarInformacoes(`UPDATE tbteste SET num_sorteado = $1 WHERE hash_key = $2`, [num_sorteado, hash_key])
-  res.status(200)
+  let query =  buscarInformacoes(`UPDATE lead SET num_sorteado = $1 WHERE key_hash = $2`, [num_sorteado, hash_key]);
+  console.log(query);
+  res.status(200);
 })
 
-app.listen(process.env.PORT_SERVER, () => {
-  console.log(`Aplicação ouvindo na porta ${process.env.PORT_SERVER}`);
+app.listen(80, () => {
+  console.log(`Aplicação ouvindo na porta 80`);
 });
 
-https.createServer({
-  cert: fs.readFileSync("./SSL/code.crt"),
-  key: fs.readFileSync("./SSL/code.key")
-}, app).listen(3001,()=>console.log("Rodando em https na porta 3001"))
+
+
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/sorteio.onlinecenter.com.br/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/sorteio.onlinecenter.com.br/fullchain.pem')
+};
+
+
+https.createServer(options, app).listen(443, () => {
+  console.log('Servidor rodando na porta 10443');
+});
+
+
 
 
 

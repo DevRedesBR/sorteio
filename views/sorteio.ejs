@@ -106,9 +106,7 @@
 
         <div id="numeroSorteado" class="container">
             <h2>Número Sorteado</h2>
-            <p id="numeroSorteado">
-                <%= numeroSorteado %>
-            </p>
+            <p id="numeroSorteado"><%= numeroSorteado %></p>
         </div>
 
         <div id="divResultado" class="container">
@@ -134,7 +132,7 @@
             console.log(hash_key)
             console.log(numSorteado.innerHTML)
 
-            fetch('http://localhost:8080/sorteio', {
+            fetch('https://sorteio.onlinecenter.com.br/sorteio', {
                 method: "POST",
                 headers: {
                     "Content-type": "application/json"
